@@ -1,5 +1,9 @@
 fastapi
 uvicorn
-groq
+langchain
+langchain-core
+langchain-groq
 tavily-python
+datasets
+pandas
 python-dotenv
