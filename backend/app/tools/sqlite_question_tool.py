@@ -256,20 +256,33 @@ Previous query:
         rows: list[tuple],
     ) -> str:
         preview_rows = rows[: self.row_limit]
-        prompt = f"""
-Answer the user question using SQL results.
-Be concise and factual. If no rows, say so clearly.
-If rows are many, summarize and show key records.
+        if not rows:
+            prompt = f"""
+You are a friendly assistant.
+The user asked: "{question}"
+No matching data was found.
+
+Write a short, natural response that sounds human.
+Do not mention SQL, query execution, row counts, or database internals.
+Optionally suggest one simple way to rephrase the request.
+"""
+        else:
+            prompt = f"""
+Answer the user's question using the provided results.
+Use a natural, conversational tone while staying concise and factual.
+Do not mention SQL, queries, row counts, table names, or database internals.
 
 Question: {question}
-SQL used: {sql_query}
 Columns: {column_names}
 Rows: {preview_rows}
-Total rows returned: {len(rows)}
 """
         response = self.llm.invoke(prompt)
         answer = (response.content or "").strip()
-        return answer
+        if answer:
+            return answer
+        if rows:
+            return "Here’s what I found."
+        return "I couldn’t find a matching result for that request."
 
     @staticmethod
     def _is_safe_query(query: str) -> bool:

@@ -135,10 +135,32 @@ def _apply_numeric_hints(df: pd.DataFrame, table_name: str) -> pd.DataFrame:
     return out
 
 
-def transform_dataframe(df: pd.DataFrame, table_name: str) -> pd.DataFrame:
+def _apply_schema_types(df: pd.DataFrame, column_types: dict[str, str]) -> pd.DataFrame:
+    out = df.copy()
+    for col in out.columns:
+        target_type = column_types.get(col, "TEXT").upper()
+        if target_type == "INTEGER":
+            numeric = pd.to_numeric(out[col].astype(str).str.replace(",", "", regex=False).str.strip(), errors="coerce")
+            out[col] = numeric.round(0).astype("Int64")
+        elif target_type == "REAL":
+            out[col] = pd.to_numeric(
+                out[col].astype(str).str.replace(",", "", regex=False).str.strip(),
+                errors="coerce",
+            )
+        # TEXT columns are intentionally preserved as-is.
+    return out
+
+
+def transform_dataframe(
+    df: pd.DataFrame,
+    table_name: str,
+    column_types: dict[str, str] | None = None,
+) -> pd.DataFrame:
     normalized_cols = [normalize_column_name(c) for c in df.columns]
     out = df.copy()
     out.columns = _rename_with_canonical_map(normalized_cols, table_name)
+    if column_types:
+        return _apply_schema_types(out, column_types)
     for col in out.columns:
         out[col] = convert_possible_numeric(out[col])
     return _apply_numeric_hints(out, table_name)

@@ -1,20 +1,83 @@
 from app.core.config import HOSPITALS_DB_PATH, INSTITUTIONS_DB_PATH, RESTAURANTS_DB_PATH
 
 
+TABLE_COLUMN_TYPES: dict[str, dict[str, str]] = {
+    "institutions": {
+        "record_key": "TEXT",
+        "id": "TEXT",
+        "code": "TEXT",
+        "institution_id": "TEXT",
+        "name": "TEXT",
+        "institution_type": "TEXT",
+        "location": "TEXT",
+        "district": "TEXT",
+        "division": "TEXT",
+        "upazila": "TEXT",
+        "ownership_type": "TEXT",
+        "contact_phone": "TEXT",
+        "contact_email": "TEXT",
+        "website": "TEXT",
+        "established_year": "INTEGER",
+        "student_capacity": "INTEGER",
+    },
+    "hospitals": {
+        "record_key": "TEXT",
+        "id": "TEXT",
+        "code": "TEXT",
+        "hospital_id": "TEXT",
+        "name": "TEXT",
+        "hospital_type": "TEXT",
+        "location": "TEXT",
+        "district": "TEXT",
+        "division": "TEXT",
+        "upazila": "TEXT",
+        "ownership_type": "TEXT",
+        "bed_capacity": "INTEGER",
+        "doctors_count": "INTEGER",
+        "nurses_count": "INTEGER",
+        "facilities": "TEXT",
+        "contact_phone": "TEXT",
+        "contact_email": "TEXT",
+        "website": "TEXT",
+    },
+    "restaurants": {
+        "record_key": "TEXT",
+        "id": "TEXT",
+        "code": "TEXT",
+        "restaurant_id": "TEXT",
+        "name": "TEXT",
+        "cuisine": "TEXT",
+        "location": "TEXT",
+        "district": "TEXT",
+        "division": "TEXT",
+        "city": "TEXT",
+        "rating": "REAL",
+        "price_range": "TEXT",
+        "contact_phone": "TEXT",
+        "website": "TEXT",
+        "latitude": "REAL",
+        "longitude": "REAL",
+    },
+}
+
+
 DATASET_CONFIG = [
     {
         "hf_id": "Mahadih534/Institutional-Information-of-Bangladesh",
         "db_path": INSTITUTIONS_DB_PATH,
         "table_name": "institutions",
+        "column_types": TABLE_COLUMN_TYPES["institutions"],
     },
     {
         "hf_id": "Mahadih534/all-bangladeshi-hospitals",
         "db_path": HOSPITALS_DB_PATH,
         "table_name": "hospitals",
+        "column_types": TABLE_COLUMN_TYPES["hospitals"],
     },
     {
         "hf_id": "Mahadih534/Bangladeshi-Restaurant-Data",
         "db_path": RESTAURANTS_DB_PATH,
         "table_name": "restaurants",
+        "column_types": TABLE_COLUMN_TYPES["restaurants"],
     },
 ]
