@@ -27,13 +27,13 @@ cp .env.example .env
 2. Add your keys in `.env`:
 - `GROQ_API_KEY`
 - `TAVILY_API_KEY`
+- `INGEST_API_TOKEN` (required for `POST /admin/ingest`)
 
 3. Optional config:
 - `GROQ_MODEL` (default: `llama-3.3-70b-versatile`)
 - `MAX_SQL_ROWS` (default: `50`)
-- `INGEST_API_TOKEN` (required for `POST /admin/ingest`)
 
-## Ingest Datasets (Required)
+## Ingest Datasets
 Run once before asking DB questions:
 
 ```bash
@@ -46,6 +46,18 @@ This creates:
 - `backend/data/institutions.db`
 - `backend/data/hospitals.db`
 - `backend/data/restaurants.db`
+
+Re-ingesting is safe:
+- ingestion uses `record_key` + `ON CONFLICT DO UPDATE` (upsert)
+- repeated ingestion updates existing rows instead of duplicating them
+
+## Database Schema
+Column types are enforced with explicit schema maps per table in `backend/app/data_ingestion/dataset_config.py`.
+
+Type policy:
+- `TEXT`: names, location fields, categories, contacts, websites
+- `INTEGER`: counts/capacity/year fields (for example: `bed_capacity`, `doctors_count`, `established_year`)
+- `REAL`: decimal metrics/coordinates (for example: `rating`, `latitude`, `longitude`)
 
 ## Run with Docker
 ```bash
@@ -71,3 +83,21 @@ Services:
 { "only": "hospitals" }
 ```
 - `only` is optional; omit it to ingest all three datasets.
+- Accepted values for `only`: `institutions`, `hospitals`, `restaurants`
+- Also accepted: `institution`, `hospital`, `restaurant`, `all`
+
+Examples:
+
+```bash
+curl -X POST http://localhost:8000/admin/ingest \
+  -H "x-api-key: YOUR_INGEST_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```bash
+curl -X POST http://localhost:8000/admin/ingest \
+  -H "x-api-key: YOUR_INGEST_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"only":"hospitals"}'
+```
